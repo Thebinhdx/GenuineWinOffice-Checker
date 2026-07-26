@@ -37,7 +37,7 @@
 | KMS38 (Massgrave) | ✅ (For Windows builds 26100.7019 and above, KMS38 is no longer functional / Windows build kể từ 26100.7019, KMS38 đã không còn hoạt động được nữa) |
 | HWID (Massgrave) | ✅ |
 | Ohook (Massgrave) | ✅ (Above V1.2 / V1.2 trở lên) |
-| TSforge (Massgrave) | ❌ (Currently under development / Đang trong quá trình phát triển) |
+| TSforge (Massgrave) / Traces of Software Protection Platform (SPP) tampering | ❌ (Currently under development / Đang trong quá trình phát triển) |
 | Modifying registry files, altering files, incorrect logic, OEM key, ... | 🟨 (It is still basically under further development / Vẫn còn cơ bản đang phát triển thêm) |
 
 ---
