@@ -1,7 +1,9 @@
 @echo off
 
+if not "%1" == "max" start /MAX cmd /c %0 max & exit/b
+
 set "namebatch=GenuineWinOffice-Checker"
-set "versionbatch=v1.2.2"
+set "versionbatch=v1.3"
 
 setlocal EnableDelayedExpansion
 
@@ -151,7 +153,6 @@ set "TIME=%Install_Date%"
 
 cls
 title GenuineWinOffice-Checker
-mode 150,50
 echo ===================-Computer Information / Thong tin may:-===================
 echo:
 echo Computer name / Ten may: %PC_NAME%
@@ -424,6 +425,24 @@ if "%reg_bypass_detected%"=="1" (
     set "registry=false"
 )
 
+echo Checking console history. / Kiem tra lich su console.
+set "ps_history_file=%APPDATA%\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
+set "found_history=0"
+
+if exist "%ps_history_file%" (
+    set "scan=true"
+    findstr /i /c:"get.activated.win" /c:"massgrave" /c:"irm https://get.activated.win | iex" "%ps_history_file%" > "%temp%\ps_history_matches.txt" 2>nul
+    
+    for %%F in ("%temp%\ps_history_matches.txt") do (
+        if %%~zF GTR 0 set "found_history=1"
+    )
+) else (
+    echo:
+    call :dk_color %Red% "Error: Scanning failed / Quet that bai"
+    set "scan=fail"
+)
+
+
 echo:
 call :dk_color %Blue% "Checking Office license / Kiem tra giay phep Office:"
 
@@ -518,7 +537,6 @@ cls
 
 
 cls
-mode 150,60
 echo =============================-Results / Ket qua-=============================
 echo:
 echo Computer name / Ten may: %PC_NAME%
@@ -623,6 +641,21 @@ if /i "%registry%"=="true" (
 
 echo:
 
+if /i "%scan%"=="true" (
+    if /i "%found_history%"=="1" (
+        call :dk_color %_Red% "[-] Traces of console usage history discovered."
+        call :dk_color %_Red% "[-] Phat hien dau vet lich su console xai crack."
+    ) else (
+	call :dk_color %_Green% "[+] No traces of console usage history found."
+    	call :dk_color %_Green% "[+] Khong phat hien dau vet lich su console xai crack."
+    )
+) else if /i "%scan%"=="fail" (
+    call :dk_color %_Yellow% "[ ] Error during console history check."
+    call :dk_color %_Yellow% "[ ] Loi trong qua trinh kiem tra lich su console."
+)
+
+echo:
+
 echo Office license check results:
 echo:
 
@@ -653,29 +686,48 @@ if /i "%office_status%"=="Not Installed" (
     call :dk_color %_Green% "[+] Khong phat hien dau hieu kich hoat lau office bang Ohook."
 ) 
 
-set "system_compromised=0"
-set "office_compromised=0"
+:: Logic phan tich windows
+set "windows=1"
 
-if /i "%KMS%"=="true" set "system_compromised=1"
-if /i "%KMS38%"=="true" set "system_compromised=1"
-if /i "%hwid%"=="true" set "system_compromised=1"
-if /i "%kmsfile%"=="true" set "system_compromised=1"
-if /i "%kmstask%"=="true" set "system_compromised=1"
-if /i "%registry%"=="true" set "system_compromised=1"
-if /i "%office_is_crackkms%"=="1" set "office_compromised=1"
-if /i "%office_is_crackohook%"=="1" set "office_compromised=1"
+:: 1 Good / Tot
+:: 2 Warning / Canh bao
+:: 3 Violate / Vi pham
+
+if /i "%kmsfile%"=="true" set "windows=2"
+if /i "%kmstask%"=="true" set "windows=2"
+if /i "%registry%"=="true" set "windows=2"
+if /i "%found_history%"=="1" set "windows=2"
+if /i "%KMS%"=="true" set "windows=3"
+if /i "%KMS38%"=="true" set "windows=3"
+if /i "%hwid%"=="true" set "windows=3"
+
+:: Logic phan tich Office
+set "office=1"
+
+:: 1 Good / Tot
+:: 2 Warning / Canh bao
+:: 3 Violate / Vi pham
+
+if /i "%office_is_crackkms%"=="1" set "office=3"
+if /i "%office_is_crackohook%"=="1" set "office=3"
 
 echo:
 
 echo Final Verdict/ Ket luan chung:
 echo:
-if "%system_compromised%"=="1" (
-    call :dk_color %_Red% "[-] Non-genuine OS activation detected / Phat hien phuong thuc kich hoat Windows khong chinh hang:"
+echo Windows:
+if /i "%windows%"=="3" (
+    call :dk_color %_Red% "[-] Illegal activation detected / Da phat hien kich hoat lau:"
     echo:
     call :dk_color %_Yellow% "The computer is being used with cracks and various other methods to bypass the license and illegally use the operating system."
     call :dk_color %_Yellow% "May tinh dang dung crack va cac cach khac nhau [KMS, HWID, KMS38] de be khoa ban quyen va su dung trai phep he dieu hanh."
-) else (
-    call :dk_color %_Green% "[+] Genuine OS activation verified / Xac nhan he dieu hanh kich hoat chinh hang hop phap:"
+) else if /i "%windows%"=="2" (
+    call :dk_color %_Yellow% "[*] Warning / Canh bao:"
+    echo:
+    call :dk_color %_Yellow% "No instances of illegal Windows activation were detected, but there were signs of previous use of cracking tools."
+    call :dk_color %_Yellow% "Khong phat hien viec kich hoat lau windows nhung co dau hieu tung su dung cac cong cu crack."
+) else if /i "%windows%"=="1" (
+    call :dk_color %_Green% "[+] Genuine legal activation / Kich hoat hop phap chinh hang:"
     echo:
     call :dk_color %_Yellow% "The system license is fully compliant. No bypass methods, unauthorized KMS servers, or licensing exploits were detected."
     call :dk_color %_Yellow% "Ban quyen he thong hoan toan hop le. Khong phat hien phuong thuc bypass, may chu KMS trai phep hoac can thiep giay phep."
@@ -683,14 +735,14 @@ if "%system_compromised%"=="1" (
     call :dk_color %Blue% "[i] This system complies with Microsoft Licensing Terms / Thiet bi nay tuan thu dung Dieu khoan ban quyen cua Microsoft."
 )
 echo:
-
-if "%office_compromised%"=="1" (
-    call :dk_color %_Red% "[-] Non-genuine Office activation detected / Phat hien phuong thuc kich hoat Office khong chinh hang:"
+echo Office:
+if /i "%office%"=="3" (
+    call :dk_color %_Red% "[-] Illegal activation detected / Da phat hien kich hoat lau:"
     echo:
     call :dk_color %_Yellow% "The computer is using the [KMS, Ohook] method to crack and illegally use Office."
     call :dk_color %_Yellow% "May tinh dang dung phuong thuc [KMS, Ohook] de be khoa va su dung trai phep Office."
-) else (
-    call :dk_color %_Green% "[+] Genuine Office activation verified / Xac nhan Office kich hoat chinh hang hop phap:"
+) else if /i "%office%"=="1" (
+    call :dk_color %_Green% "[+] Genuine legal activation / Kich hoat hop phap chinh hang:"
     echo:
     call :dk_color %_Yellow% "The copyright is completely legitimate. No cracking methods, KMS servers, or license interference were detected."
     call :dk_color %_Yellow% "Ban quyen hoan toan hop le. Khong phat hien cac phuong thuc be khoa, may chu KMS hoac su can thiep giay phep."
