@@ -21,6 +21,12 @@
 >
 > *Kết luận của phần mềm không đảm bảo lúc nào cũng đúng nên kiểm tra lại cẩn thận trước khi kết luận.*
 
+> [!NOTE]
+>
+> **Only support Windows 10 (21H1) / 11.**
+> 
+> Windows older than Windows 10 (21H1) will not work.
+
 ---
 
 ### 🕵️‍♀️ Currently detectable activation methods / Những phương pháp kích hoạt có thể phát hiện hiện tại
