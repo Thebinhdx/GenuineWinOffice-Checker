@@ -3,7 +3,7 @@
 if not "%1" == "max" start /MAX cmd /c %0 max & exit/b
 
 set "namebatch=GenuineWinOffice-Checker"
-set "versionbatch=v1.3"
+set "versionbatch=v1.3.1"
 
 setlocal EnableDelayedExpansion
 
@@ -83,6 +83,10 @@ for /f "tokens=2*" %%A in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\Curren
 set "OS_NAME=%OS_Name%"
 set "VERSION=%OS_Version%"
 
+for /f "tokens=3" %%A in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v EditionID 2^>nul') do (
+    set "EDITION=%%A"
+)
+
 cscript //nologo %systemroot%\system32\slmgr.vbs /xpr | findstr /i "permanently" >nul
 
 if %errorlevel% equ 0 (
@@ -95,6 +99,30 @@ if %errorlevel% equ 0 (
         set "WIN_ACT=Unactivated / Chua kich hoat hoac loi"
     )
 )
+
+
+if defined PROCESSOR_ARCHITEW6432 (
+    set "ARCH=x64"
+) else (
+    if /i "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+        set "ARCH=x64"
+    ) else if /i "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+        set "ARCH=ARM64"
+    ) else (
+        set "ARCH=x86"
+    )
+)
+
+
+set "LTSC=No"
+
+echo %OS_NAME% | find /i "LTSC" >nul && set "LTSC=Yes"
+
+echo %OS_NAME% | find /i "IoT Enterprise LTSC" >nul && set "LTSC=Yes"
+
+set "EVALUATION=No"
+
+echo %OS_NAME% | find /i "Evaluation" >nul && set "EVALUATION=Yes"
 
 set "office_installed=0"
 set "office_activated=0"
@@ -156,21 +184,25 @@ title GenuineWinOffice-Checker
 echo ===================-Computer Information / Thong tin may:-===================
 echo:
 echo Computer name / Ten may: %PC_NAME%
-echo:
 echo User / Nguoi dung: %CURRENT_USER%
 echo:
-echo OS / He dieu hanh: %OS_NAME% %VERSION%
+echo Windows:
 echo:
-echo Activation Status / Tinh trang kich hoat:
+echo OS / He dieu hanh: %OS_NAME% 
+echo Edition / Phien ban: %EDITION%
+echo Version / Phien ban: %VERSION%
+echo Architecture / Kien truc: %ARCH%
+echo LTSC: %LTSC%
+echo Evaluation: %EVALUATION%
+echo Installed On / Thoi gian cai dat: %TIME%
+call :dk_color2 %_White% "Activation status / Tinh trang kich hoat: " %_Yellow% "%WIN_ACT%"
 echo:
-call :dk_color2 %_White% "Windows: " %_Yellow% "%WIN_ACT%"
+echo Office:
 echo:
-call :dk_color2 %_White% "Office: " %_Yellow% "%OFFINSTALLED%"
-call :dk_color %_Yellow% "        %OFF_ACT%
+call :dk_color2 %_White% "Status / Tinh trang: " %_Yellow% "%OFFINSTALLED%"
+call :dk_color2 %_White% "Activation status / Tinh trang kich hoat: " %_Yellow% "%OFF_ACT%"
 echo:
 call :dk_color %Blue% "[i] Just because Office says its not activated doesnt mean it hasnt been cracked."
-echo:
-echo Installed On / Thoi gian cai dat: %TIME%
 echo:
 echo =============================================================================
 echo Name: %namebatch%
@@ -442,7 +474,6 @@ if exist "%ps_history_file%" (
     set "scan=fail"
 )
 
-
 echo:
 call :dk_color %Blue% "Checking Office license / Kiem tra giay phep Office:"
 
@@ -540,9 +571,7 @@ cls
 echo =============================-Results / Ket qua-=============================
 echo:
 echo Computer name / Ten may: %PC_NAME%
-echo:
 echo User / Nguoi dung: %CURRENT_USER%
-echo:
 echo Date of results/ Ngay xuat ket qua: %time%
 echo:
 echo =============================================================================
