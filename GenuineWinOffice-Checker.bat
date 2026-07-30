@@ -3,7 +3,7 @@
 if not "%1" == "max" start /MAX cmd /c %0 max & exit/b
 
 set "namebatch=GenuineWinOffice-Checker"
-set "versionbatch=v1.3.1"
+set "versionbatch=v1.3.2"
 
 setlocal EnableDelayedExpansion
 
@@ -562,6 +562,7 @@ call :dk_color %Green% "Scanning successful. / Quet thanh cong."
 timeout /t 3 /nobreak >nul
 cls
 call :dk_color %_Yellow% "Outputting results. / Dang xuat ket qua."
+set "ctime=%time%"
 timeout /t 2 /nobreak >nul
 cls
 
@@ -572,7 +573,7 @@ echo =============================-Results / Ket qua-===========================
 echo:
 echo Computer name / Ten may: %PC_NAME%
 echo User / Nguoi dung: %CURRENT_USER%
-echo Date of results/ Ngay xuat ket qua: %time%
+echo Date of results/ Ngay xuat ket qua: %ctime%
 echo:
 echo =============================================================================
 echo:
@@ -726,6 +727,7 @@ if /i "%kmsfile%"=="true" set "windows=2"
 if /i "%kmstask%"=="true" set "windows=2"
 if /i "%registry%"=="true" set "windows=2"
 if /i "%found_history%"=="1" set "windows=2"
+if /i "%bios%"=="upgrade" set "windows=2"
 if /i "%KMS%"=="true" set "windows=3"
 if /i "%KMS38%"=="true" set "windows=3"
 if /i "%hwid%"=="true" set "windows=3"
@@ -780,8 +782,35 @@ if /i "%office%"=="3" (
 echo:
 call :dk_color %Blue% "[i] The results are from an automated check and are not guaranteed to be accurate; please check manually for more details."
 echo:
-echo Press any key to exit...
+echo Press any key to save report and exit...
 pause >nul
+echo Saving report...
+(
+  echo Report Information:
+  echo.
+  echo Computer name: %PC_NAME%
+  echo User: %CURRENT_USER%
+  echo Scan time: %ctime%
+  echo %namebatch% %versionbatch%
+  echo.
+  echo Windows:
+  echo Online KMS: %KMS%
+  echo KMS38: %KMS38%
+  echo HWID: %hwid%
+  echo Suspicious file: %kmsfile%
+  echo Suspicious task: %kmstask%
+  echo Suspicious registry: %registry%
+  echo BIOS key: %bios%
+  echo Console history: %found_history%
+  echo.
+  echo Office:
+  echo KMS: %office_is_crackkms%
+  echo Ohook: %office_is_crackohook%
+  echo.
+  echo End report.
+) > %~dp0\report.txt
+attrib +r "%~dp0\report.txt"
+timeout /t 2 /nobreak >nul
 exit
 
 
