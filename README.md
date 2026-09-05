@@ -6,6 +6,9 @@
 
 <hr>
 
+> [!WARNING]
+> **The project, which was running in batch file language, has been discontinued and archived. Please use the new project, which runs in C#, here: [GenWinOffice](https://github.com/Thebinhdx/GenWinOffice)**
+
 ## ⚠️ IMPORTANT NOTICE / LƯU Ý QUAN TRỌNG TRƯỚC KHI TẢI
 
 > [!WARNING]
